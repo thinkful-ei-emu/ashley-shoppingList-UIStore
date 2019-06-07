@@ -58,10 +58,26 @@ function renderShoppingList() {
 }
 
 
+
 function addItemToShoppingList(itemName) {
   console.log(`Adding "${itemName}" to shopping list`);
   STORE.items.push({name: itemName, checked: false});
 }
+
+// User can type in a search term and the displayed list will be filtered 
+// by item names only containing that search term
+
+function handleSearchDisplay (){
+    $('#js-search-list-form').submit(function(event) {
+        event.preventDefault();
+        console.log('`handleSearchDisplay` ran')
+        const filterItemName = $('.shopping-list-search').val();
+       // $('.shopping-list-search').val('');
+    })
+}
+
+
+
 
 function handleNewItemSubmit() {
   $('#js-shopping-list-form').submit(function(event) {
