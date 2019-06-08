@@ -2,18 +2,19 @@
 
 const STORE = {
   items: [
-    {id: cuid(), name: "apples", checked: false},
-    {id: cuid(), name: "oranges", checked: false},
-    {id: cuid(), name: "milk", checked: true},
-    {id: cuid(), name: "bread", checked: false}
+    {id: cuid(), name: "apples", checked: false, visible: true},
+    {id: cuid(), name: "oranges", checked: false, visible: true},
+    {id: cuid(), name: "milk", checked: true, visible: true},
+    {id: cuid(), name: "bread", checked: false, visible: true}
   ],
-  hideCompleted: false
+  hideCompleted: false,
+  
 };
 
 function generateItemElement(item) {
   return `
     <li data-item-id="${item.id}">
-      <span class="shopping-item js-shopping-item ${item.checked ? "shopping-item__checked" : ''}">${item.name}</span>
+      <span class="shopping-item js-shopping-item ${item.checked ? "shopping-item__checked" : ''}">${item.name}</span>      
       <div class="shopping-item-controls">
         <button class="shopping-item-toggle js-item-toggle">
             <span class="button-label">check</span>
@@ -41,12 +42,14 @@ function renderShoppingList() {
 
   // set up a copy of the store's items in a local variable that we will reassign to a new
   // version if any filtering of the list occurs
-  let filteredItems = STORE.items;
-
+  let filteredItems = STORE.items;  
   // if the `hideCompleted` property is true, then we want to reassign filteredItems to a version
   // where ONLY items with a "checked" property of false are included
   if (STORE.hideCompleted) {
     filteredItems = filteredItems.filter(item => !item.checked);
+  }
+  if (filteredItems.visible) {
+    filteredItems = filteredItems.filter(item => !item.visible);
   }
 
   // at this point, all filtering work has been done (or not done, if that's the current settings), so
@@ -59,21 +62,57 @@ function renderShoppingList() {
 
 
 
+
+
 function addItemToShoppingList(itemName) {
   console.log(`Adding "${itemName}" to shopping list`);
-  STORE.items.push({name: itemName, checked: false});
+  STORE.items.push({name: itemName, checked: false, visible: true});
 }
 
 // User can type in a search term and the displayed list will be filtered 
 // by item names only containing that search term
 
-function handleSearchDisplay (){
+function handleSearchSubmit (){
     $('#js-search-list-form').submit(function(event) {
         event.preventDefault();
-        console.log('`handleSearchDisplay` ran')
-        const filterItemName = $('.shopping-list-search').val();
-       // $('.shopping-list-search').val('');
-    })
+        console.log('handleSearchSubmit ran');
+        const filteredItemName = $('.js-shopping-list-search').val();
+        $('.js-shopping-list-search').val('');       
+        findItemInShoppingList(filteredItemName);              
+        renderShoppingList(); 
+       
+    });
+}
+
+//search in list for item name. 
+//if item is in list (returns true) then display all matching items in list
+//else return message "item not found"
+function findItemInShoppingList (itemName){ 
+    //create a new array that includes all items that match search item name
+    const itemsArray = STORE.items.filter(item => item.name === itemName)
+    // if filter found search item in store, array length will be greater than 0
+    // now use find method to retrieve value of the matching item name
+    if(itemsArray.length > 0){
+        const matchItem = itemsArray.find(item => item.name === itemName);
+        STORE.items.forEach(item => {
+            //if the items in the store do not match the search item name then set visible to 'false'
+            if(item.name !== matchItem.name){
+                item.visible = false;
+                console.log('is not visible')                
+                console.log(STORE.items); 
+            }
+        });    
+    }
+    else {   
+        alert(`${itemName} is not on this shopping list`);        
+    }  
+    displayMatchedItems(itemName);   
+}
+
+function displayMatchedItems(searchItem){
+    let items = STORE.items; 
+    
+   
 }
 
 
@@ -160,6 +199,7 @@ function handleToggleHideFilter() {
 function handleShoppingList() {
   renderShoppingList();
   handleNewItemSubmit();
+  handleSearchSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleToggleHideFilter();
